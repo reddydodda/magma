@@ -108,7 +108,7 @@ nginx:
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
-
+ 
   # Define which Nodes the Pods are scheduled on.
   # ref: https://kubernetes.io/docs/user-guide/node-selection/
   nodeSelector: {}
