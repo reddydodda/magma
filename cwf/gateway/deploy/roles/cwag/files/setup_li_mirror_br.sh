@@ -11,7 +11,7 @@ sudo ovs-vsctl --may-exist add-port cwag_br0 li_port -- set Interface li_port ty
 sudo ifconfig li_port up
 
 # LI might not be enabled for all setups
-if [ -d "/sys/class/net/eth4" ]
+if [ -d "/sys/class/net/eth5" ]
 then
   sudo ovs-vsctl --may-exist add-port cwag_br0 eth4
 
