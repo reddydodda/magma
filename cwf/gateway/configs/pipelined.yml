@@ -103,7 +103,7 @@ ipfix:
   obs_point_id: 1
 
 # Configuration for LI mirroring
-li_local_iface: li_port
+#li_local_iface: li_port
 li_mirror_all: false
 #li_dst_iface: eth4
 
