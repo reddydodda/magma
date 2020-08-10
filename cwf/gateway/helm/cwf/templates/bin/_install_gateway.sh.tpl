@@ -172,6 +172,9 @@ if [ "$GW_TYPE" == "$CWAG" ] && [ -f "$DPI_LICENSE_NAME" ]; then
   mkdir -p "$SECRETS_VOLUME"
   cp "$INSTALL_DIR"/magma/"$MODULE_DIR"/gateway/docker/docker-compose-dpi.override.yml /var/opt/magma/docker/
   cp "$DPI_LICENSE_NAME" "$SECRETS_VOLUME"
+  cd /var/opt/magma/docker
+  docker-compose -f docker-compose-dpi.override.yml pull
+  docker-compose -f docker-compose-dpi.override.yml up -d --remove-orphans
 fi
 
 cd /var/opt/magma/docker
@@ -182,12 +185,5 @@ docker login "$DOCKER_REGISTRY" --username "$DOCKER_USERNAME" --password "$DOCKE
 fi
 docker-compose pull
 docker-compose -f docker-compose.yml up -d
-
-# Pull and Run DPI container
-if [ "$GW_TYPE" == "$CWAG" ] && [ -f "$DPI_LICENSE_NAME" ]; then
-  cd /var/opt/magma/docker
-  docker-compose -f docker-compose-dpi.override.yml pull
-  docker-compose -f docker-compose-dpi.override.yml up -d
-fi
 
 echo "Installed successfully!!"
