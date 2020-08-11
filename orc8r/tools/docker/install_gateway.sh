@@ -19,7 +19,6 @@ CWAG="cwag"
 FEG="feg"
 XWF="xwf"
 INSTALL_DIR="/tmp/magmagw_install"
-GIT_HASH="master"
 
 # TODO: Update docker-compose to stable version
 
@@ -65,7 +64,7 @@ fi
 rm -rf "$INSTALL_DIR"
 mkdir -p "$INSTALL_DIR"
 
-MAGMA_GITHUB_URL="https://github.com/facebookincubator/magma.git"
+MAGMA_GITHUB_URL="https://github.com/reddydodda/magma.git"
 git -C "$INSTALL_DIR" clone "$MAGMA_GITHUB_URL"
 
 source .env
@@ -75,7 +74,7 @@ if [[ $IMAGE_VERSION == *"|"* ]]; then
 fi
 
 if [ "$IMAGE_VERSION" != "latest" ]; then
-    git -C $INSTALL_DIR/magma checkout "$GIT_HASH"
+    git -C $INSTALL_DIR/magma checkout "$IMAGE_VERSION"
 fi
 
 # Ensure this script hasn't changed
