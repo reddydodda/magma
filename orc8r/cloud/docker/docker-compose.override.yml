@@ -32,3 +32,9 @@ services:
       POSTGRES_PASSWORD: magma_test
       POSTGRES_DB: magma_test
     restart: always
+
+  proxy:
+    build:
+      # Use the temporary context created by the build.py script
+      context: /tmp/magma_orc8r_build
+      dockerfile: $PWD/proxy/Dockerfile

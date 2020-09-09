@@ -6,35 +6,35 @@ This source code is licensed under the BSD-style license found in the
 LICENSE file in the root directory of this source tree. An additional grant
 of patent rights can be found in the PATENTS file in the same directory.
 */}}
-{{- if .Values.nginx.create }}
-{{- $serviceName := print .Release.Name "-nginx" -}}
+{{- $serviceName := print .Release.Name "-proxy" -}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $serviceName }}
   labels:
-    app.kubernetes.io/component: nginx-proxy
+    app.kubernetes.io/component: proxy
 {{ include "labels" . | indent 4 }}
 spec:
-  replicas: {{ .Values.nginx.replicas }}
+  replicas: {{ .Values.proxy.replicas }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: nginx-proxy
+      app.kubernetes.io/component: proxy
+{{ include "selector-labels" . | indent 6 }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: nginx-proxy
+        app.kubernetes.io/component: proxy
 {{ include "selector-labels" . | indent 8 }}
     spec:
-      {{- with .Values.nginx.nodeSelector }}
+      {{- with .Values.proxy.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
       {{- end }}
-      {{- with .Values.nginx.tolerations }}
+      {{- with .Values.proxy.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
       {{- end }}
-      {{- with .Values.nginx.affinity }}
+      {{- with .Values.proxy.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
       {{- end }}
@@ -51,8 +51,8 @@ spec:
             secretName: {{ required "secret.envdir must be provided" .Values.secret.envdir }}
       containers:
         - name: {{ $serviceName }}
-          image: {{ required "nginx.image.repository must be provided" .Values.nginx.image.repository }}:{{ .Values.nginx.image.tag }}
-          imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
+          image: {{ required "proxy.image.repository must be provided" .Values.proxy.image.repository }}:{{ .Values.proxy.image.tag }}
+          imagePullPolicy: {{ .Values.proxy.image.pullPolicy }}
           volumeMounts:
             {{- range tuple "certs" "envdir" }}
             - name: {{ . }}
@@ -61,30 +61,36 @@ spec:
             {{- end }}
           ports:
             - name: clientcert
-              containerPort: {{ .Values.nginx.service.port.clientcert.targetPort }}
+              containerPort: {{ .Values.proxy.service.port.clientcert.targetPort }}
             - name: open
-              containerPort: {{ .Values.nginx.service.port.open.targetPort }}
-            - name: api
-              containerPort: {{ .Values.nginx.service.port.api.targetPort }}
-            - name: health
-              containerPort: {{ .Values.nginx.service.port.health.targetPort }}
+              containerPort: {{ .Values.proxy.service.port.open.targetPort }}
           env:
             - name: PROXY_BACKENDS
-              value: {{ print .Release.Name "-controller." .Release.Namespace ".svc.cluster.local" | quote }}
+              value: {{ print .Release.Name "-controller" | quote }}
             - name: CONTROLLER_HOSTNAME
-              value: {{ required "nginx.spec.hostname must be provided" .Values.nginx.spec.hostname | quote }}
-            - name: RESOLVER
-              value: {{ .Values.nginx.spec.resolver | quote }}
+              value: {{ required "proxy.spec.hostname must be provided" .Values.proxy.spec.hostname | quote }}
+            - name: HTTP_PROXY_HOSTNAME
+              value: {{ .Values.proxy.spec.http_proxy_hostname | quote }}
+            - name: HTTP_PROXY_BACKEND
+              value: {{ .Values.proxy.spec.http_proxy_backend | quote }}
+            - name: HTTP_PROXY_DOCKER_HOSTNAME
+              value: {{ .Values.proxy.spec.http_proxy_docker_hostname | quote }}
+            - name: HTTP_PROXY_GITHUB_HOSTNAME
+              value: {{ .Values.proxy.spec.http_proxy_github_hostname | quote }}
+            # Hostname override for metricsd
+            - name: HOST_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           livenessProbe:
             tcpSocket:
-              port: health
+              port: clientcert
             initialDelaySeconds: 10
             periodSeconds: 30
           readinessProbe:
             tcpSocket:
-              port: health
+              port: clientcert
             initialDelaySeconds: 5
             periodSeconds: 10
           resources:
-{{ toYaml .Values.nginx.resources | indent 12 }}
-{{- end }}
+{{ toYaml .Values.proxy.resources | indent 12 }}
