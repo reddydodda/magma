@@ -6,23 +6,23 @@ This source code is licensed under the BSD-style license found in the
 LICENSE file in the root directory of this source tree. An additional grant
 of patent rights can be found in the PATENTS file in the same directory.
 */}}
-{{- if and .Values.nginx.podDisruptionBudget.enabled (gt .Values.nginx.replicas 1.0 )}}
+{{- if and .Values.proxy.podDisruptionBudget.enabled (gt .Values.proxy.replicas 1.0 )}}
 apiVersion: policy/v1beta1
 kind: PodDisruptionBudget
 metadata:
-  name: {{ .Release.Name }}-nginx-proxy
+  name: {{ .Release.Name }}-proxy
   labels:
-    app.kubernetes.io/component: nginx-proxy
+    app.kubernetes.io/component: proxy
 {{ include "labels" . | indent 4 }}
 spec:
-  {{- with .Values.nginx.podDisruptionBudget.minAvailable }}
+  {{- with .Values.proxy.podDisruptionBudget.minAvailable }}
   minAvailable: {{ . }}
   {{- end }}
-  {{- with .Values.nginx.podDisruptionBudget.maxUnavailable }}
+  {{- with .Values.proxy.podDisruptionBudget.maxUnavailable }}
   maxUnavailable: {{ . }}
   {{- end }}
   selector:
     matchLabels:
-      app.kubernetes.io/component: nginx-proxy
+      app.kubernetes.io/component: proxy
 {{ include "selector-labels" . | indent 6 }}
 {{- end }}
